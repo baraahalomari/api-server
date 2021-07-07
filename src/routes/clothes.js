@@ -2,9 +2,9 @@
 
 const express = require('express');
 const router = express.Router();
-const clothesModel = require('../models/clothes');
+// const clothesModel = require('../models/clothes');
 const Collection = require('../models/data-collection-class');
-const clothes = new Collection(clothesModel);
+const clothes = new Collection('clothes');
 
 router.get('/', getClothes);
 router.get('/:id', getClothes);
@@ -16,7 +16,7 @@ async function getClothes(req,res,next){
   try{
     const id = req.params.id;
     const clothess = await clothes.read(id);
-    res.json({clothess});
+    res.json({clothess:clothess.rows});
   }catch(e){
     next(e)
   }
@@ -26,7 +26,7 @@ async function createClothes (req,res,next){
   try{
     const data = req.body;
     const newClothes = await clothes.create(data);
-    res.json(newClothes);
+    res.json(newClothes.rows[0]);
   }catch(e){
     next(e);
   }
@@ -37,7 +37,7 @@ async function updateClothes(req, res, next) {
     const id = req.params.id;
     const data = req.body;
     const newClothes = await clothes.update(id, data);
-    res.json(newClothes);
+    res.json(newClothes.rows[0]);
   } catch (e) {
     next(e);
   }
@@ -46,7 +46,7 @@ async function deleteClothes(req, res, next) {
     try {
       const id = req.params.id;
       const deleteClothes = await clothes.delete(id);
-      res.json(deleteClothes);
+      res.json(deleteClothes.rows[0]);
     } catch (e) {
       next(e);
     }

@@ -1,24 +1,28 @@
 'use strict';
-
+const pool = require('../../pool');
 class Collection {
-  constructor(model){
-    this.model = model;
+  constructor(tabel){
+    this.tabel = tabel;
   }
   create(obj){
-    const doc = new this.model(obj);
-    return doc.save();
+    const sql = `INSERT INTO ${this.tabel} (name,price) VALUES ($1,$2) RETURNING *;`;
+    console.log(sql);
+    const safeValues = [obj.name, obj.price];
+    return pool.query(sql, safeValues);
   }
-  read(_id) {
-    if (_id) {
-      return this.model.find({ _id });
+  read(id) {
+    if (id) {
+      return pool.query(`SELECT * FROM ${this.tabel} WHERE id=$1;`,[id]);
     }
-    return this.model.find({});
+    return pool.query(`SELECT * FROM ${this.tabel};`);
   }
-  update(_id, obj) {
-    return this.model.findByIdAndUpdate(_id, obj, { new: true });
+  update(id, obj) {
+    const sql = `UPDATE ${this.tabel} SET name=$1,price=$2 WHERE id=$3 RETURNING *;`;
+    const safeValues = [obj.name, obj.price, id];
+    return pool.query(sql, safeValues);
   }
-  delete(_id) {
-    return this.model.findByIdAndDelete(_id);
+  delete(id) {
+    return pool.query(`DELETE FROM ${this.tabel} WHERE id=$1 RETURNING *;`,[id] );
   }
 }
 module.exports = Collection;
